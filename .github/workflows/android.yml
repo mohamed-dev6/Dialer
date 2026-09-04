@@ -27,10 +27,21 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Verify APK
+        run: |
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          test -f "$APK" || {
+            echo "APK not found!"
+            exit 1
+          }
+          echo "APK found: $APK"
 
       - name: Upload APK to v1.0.0 Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload v1.0.0 app/build/outputs/apk/release/*.apk --clobber
+          gh release upload v1.0.0 \
+            app/build/outputs/apk/debug/app-debug.apk \
+            --clobber
